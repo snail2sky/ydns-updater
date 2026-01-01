@@ -20,8 +20,10 @@ cp $GOPATH/src/github.com/wyattjoh/ydns-updater/systemd/ydns-updater.service /et
 # Adjust /root/go/bin to where your $GOPATH/bin directory is for your user
 #
 # --host "<HOST TO UPDATE>"
-# --user "<API USERNAME>" Found https://ydns.eu/api/
-# --pass "<API PASS>" Found https://ydns.eu/api/
+# --user "<API USERNAME>" Found https://ydns.io/api/v1/
+# --pass "<API PASS>" Found https://ydns.io/api/v1/
+# --ip "<IP>" Optional. Found https://ydns.io/api/v1/
+# --record_id "<RECORD_ID>" Optional. Found https://ydns.io/api/v1/
 vim /etc/systemd/system/ydns-updater.service
 
 # Start and enable service
@@ -41,3 +43,19 @@ brew install wyattjoh/stable/ydns-updater
 2. Download systemd unit file and install into `/etc/systemd/system`
 3. Start service `systemctl start ydns-updater.service`
 4. Enable service `systemctl enable ydns-updater.service`
+
+### Usage
+
+```bash
+$ # Update the IP address of host "example.ydns.eu" with the IP Address as seen by the web server.
+$ ydns-updater --host example.ydns.eu --user xxxxxx --pass xxxxxx
+
+$ # Update the IP address of host "example.ydns.eu" with IPv4 Address "123.45.67.89".
+$ ydns-updater --host example.ydns.eu --user xxxxxx --pass xxxxxx --ip 123.45.67.89
+
+$ # Update the Content of host "example.ydns.eu" with the IP Address as seen by the web server.
+$ ydns-updater --host example.ydns.eu --user xxxxxx --pass xxxxxx --record_id 1234
+
+$ # Update the IP address of host "example.ydns.eu" with the IP Address as seen by the web server. Enables the updater as a daemon and sleep time is 30s
+$ ydns-updater --host example.ydns.eu --user xxxxxx --pass xxxxxx --daemon --frequency 0h0m30s
+```

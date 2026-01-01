@@ -33,6 +33,16 @@ func main() {
 			Usage:    "host to update",
 		},
 		&cli.StringFlag{
+			Name:     "ip",
+			EnvVars:  []string{"YDNS_IP"},
+			Usage:    "ip to update",
+		},
+		&cli.StringFlag{
+			Name:     "record_id",
+			EnvVars:  []string{"YDNS_RECORD_ID"},
+			Usage:    "record_id to update",
+		},
+		&cli.StringFlag{
 			Name:     "user",
 			EnvVars:  []string{"YDNS_USER"},
 			Required: true,
@@ -63,6 +73,8 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		base := c.String("base")
 		host := c.String("host")
+		ip := c.String("ip")
+		record_id := c.String("record_id")
 		user := c.String("user")
 		pass := c.String("pass")
 		daemon := c.Bool("daemon")
@@ -72,7 +84,7 @@ func main() {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 
-		if err := ydns.Run(base, host, user, pass); err != nil {
+		if err := ydns.Run(base, host, ip, record_id, user, pass); err != nil {
 			return cli.Exit(err, 1)
 		}
 
@@ -80,7 +92,7 @@ func main() {
 			logrus.WithField("sleep", frequency).Info("sleeping till next update")
 			time.Sleep(frequency)
 
-			if err := ydns.Run(base, host, user, pass); err != nil {
+			if err := ydns.Run(base, host, ip, record_id, user, pass); err != nil {
 				return cli.Exit(err, 1)
 			}
 		}

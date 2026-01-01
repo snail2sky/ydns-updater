@@ -10,7 +10,7 @@ import (
 )
 
 // Run will run the update operation.
-func Run(base, host, user, pass string) error {
+func Run(base, host, ip, record_id, user, pass string) error {
 	u, err := url.Parse(base)
 	if err != nil {
 		return errors.Wrap(err, "cannot create url")
@@ -18,6 +18,14 @@ func Run(base, host, user, pass string) error {
 
 	values := url.Values{}
 	values.Set("host", host)
+
+	if ip != "" {
+		values.Set("ip", ip)
+	}
+
+	if record_id != "" {
+		values.Set("record_id", record_id)
+	}
 
 	u.RawQuery = values.Encode()
 
@@ -29,6 +37,8 @@ func Run(base, host, user, pass string) error {
 	req.SetBasicAuth(user, pass)
 
 	logrus.WithField("host", host).Info("updating record")
+	logrus.WithField("ip", ip).Info("updating record")
+	logrus.WithField("record_id", record_id).Info("updating record")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
