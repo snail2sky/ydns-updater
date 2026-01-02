@@ -20,10 +20,12 @@ func Run(base, host, ip, record_id, user, pass string) error {
 	values.Set("host", host)
 
 	if ip != "" {
+		logrus.WithField("ip", ip).Info("updating record")
 		values.Set("ip", ip)
 	}
 
 	if record_id != "" {
+		logrus.WithField("record_id", record_id).Info("updating record")
 		values.Set("record_id", record_id)
 	}
 
@@ -37,8 +39,6 @@ func Run(base, host, ip, record_id, user, pass string) error {
 	req.SetBasicAuth(user, pass)
 
 	logrus.WithField("host", host).Info("updating record")
-	logrus.WithField("ip", ip).Info("updating record")
-	logrus.WithField("record_id", record_id).Info("updating record")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
