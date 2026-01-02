@@ -23,6 +23,8 @@ func Run(base, host, ip, record_id, user, pass, family string) error {
 	values := url.Values{}
 	values.Set("host", host)
 
+	logrus.WithField("ip family", family).Info("updating record")
+
 	if ip != "" {
 		logrus.WithField("ip", ip).Info("updating record")
 		values.Set("ip", ip)
