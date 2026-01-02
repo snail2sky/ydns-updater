@@ -33,14 +33,14 @@ func main() {
 			Usage:    "host to update",
 		},
 		&cli.StringFlag{
-			Name:     "ip",
-			EnvVars:  []string{"YDNS_IP"},
-			Usage:    "ip to update",
+			Name:    "ip",
+			EnvVars: []string{"YDNS_IP"},
+			Usage:   "ip to update",
 		},
 		&cli.StringFlag{
-			Name:     "record_id",
-			EnvVars:  []string{"YDNS_RECORD_ID"},
-			Usage:    "record_id to update",
+			Name:    "record_id",
+			EnvVars: []string{"YDNS_RECORD_ID"},
+			Usage:   "record_id to update",
 		},
 		&cli.StringFlag{
 			Name:     "user",
@@ -69,6 +69,12 @@ func main() {
 			Name:  "debug",
 			Usage: "enables debug logging",
 		},
+		&cli.StringFlag{
+			Name:    "family",
+			EnvVars: []string{"YDNS_FAMILY"},
+			Value:   "any",
+			Usage:   "force IP family for outgoing requests: ipv4|ipv6|any",
+		},
 	}
 	app.Action = func(c *cli.Context) error {
 		base := c.String("base")
@@ -77,6 +83,7 @@ func main() {
 		record_id := c.String("record_id")
 		user := c.String("user")
 		pass := c.String("pass")
+		family := c.String("family")
 		daemon := c.Bool("daemon")
 		frequency := c.Duration("frequency")
 
@@ -84,7 +91,7 @@ func main() {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 
-		if err := ydns.Run(base, host, ip, record_id, user, pass); err != nil {
+		if err := ydns.Run(base, host, ip, record_id, user, pass, family); err != nil {
 			return cli.Exit(err, 1)
 		}
 
@@ -92,7 +99,7 @@ func main() {
 			logrus.WithField("sleep", frequency).Info("sleeping till next update")
 			time.Sleep(frequency)
 
-			if err := ydns.Run(base, host, ip, record_id, user, pass); err != nil {
+			if err := ydns.Run(base, host, ip, record_id, user, pass, family); err != nil {
 				return cli.Exit(err, 1)
 			}
 		}

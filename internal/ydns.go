@@ -1,7 +1,9 @@
 package ydns
 
 import (
+	"context"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 
@@ -10,7 +12,9 @@ import (
 )
 
 // Run will run the update operation.
-func Run(base, host, ip, record_id, user, pass string) error {
+// Run will execute the update operation. The `family` parameter can be
+// "ipv4", "ipv6" or any other value (means no preference).
+func Run(base, host, ip, record_id, user, pass, family string) error {
 	u, err := url.Parse(base)
 	if err != nil {
 		return errors.Wrap(err, "cannot create url")
@@ -40,7 +44,25 @@ func Run(base, host, ip, record_id, user, pass string) error {
 
 	logrus.WithField("host", host).Info("updating record")
 
-	res, err := http.DefaultClient.Do(req)
+	// Build an HTTP client that can be forced to use IPv4 or IPv6 when needed.
+	transport, _ := http.DefaultTransport.(*http.Transport)
+	tr := transport.Clone()
+
+	switch family {
+	case "ipv4", "4":
+		tr.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			d := &net.Dialer{}
+			return d.DialContext(ctx, "tcp4", addr)
+		}
+	case "ipv6", "6":
+		tr.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			d := &net.Dialer{}
+			return d.DialContext(ctx, "tcp6", addr)
+		}
+	}
+
+	client := &http.Client{Transport: tr}
+	res, err := client.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "cannot perform http get")
 	}

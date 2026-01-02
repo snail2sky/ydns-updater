@@ -32,7 +32,7 @@ func TestRun(t *testing.T) {
 	defer ts.Close()
 
 	// Ensure there's no error running it with the right options.
-	if err := ydns.Run(ts.URL, "test-1.com", "x.x.x.x", "record_id", "user", "pass"); err != nil {
+	if err := ydns.Run(ts.URL, "test-1.com", "x.x.x.x", "record_id", "user", "pass", "ipv4"); err != nil {
 		t.Fatalf("expected no errors, got: %v", err)
 	}
 

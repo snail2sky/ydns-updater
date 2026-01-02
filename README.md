@@ -58,4 +58,7 @@ $ ydns-updater --host example.ydns.eu --user xxxxxx --pass xxxxxx --record_id 12
 
 $ # Update the IP address of host "example.ydns.eu" with the IP Address as seen by the web server. Enables the updater as a daemon and sleep time is 30s
 $ ydns-updater --host example.ydns.eu --user xxxxxx --pass xxxxxx --daemon --frequency 0h0m30s
+
+$ # Update the IP address of host "example.ydns.eu" with the IP Address as seen by the web server. Force the use of ipv6 protocol and please make sure the current network supports ipv6
+$ ydns-updater --host example.ydns.eu --user xxxxxx --pass xxxxxx --family ipv6
 ```
