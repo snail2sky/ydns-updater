@@ -13,17 +13,22 @@ func TestRun(t *testing.T) {
 	// This can be run "in parallel".
 	t.Parallel()
 
-	var host string
-	var ip string
-	var record_id string
+	var (
+		host     string
+		ip       string
+		recordID string
+		//user     string
+		//pass     string
+	)
 
 	// Setup the testing server to get the request.
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Set the passed "host" request parameter as the external "host" var.
 		host = r.URL.Query().Get("host")
 		ip = r.URL.Query().Get("ip")
-		record_id = r.URL.Query().Get("record_id")
-
+		recordID = r.URL.Query().Get("record_id")
+		auth := r.Header.Get("authorization")
+		fmt.Println(auth)
 		r.URL.User.Username()
 
 		// Send the OK back.
@@ -31,8 +36,17 @@ func TestRun(t *testing.T) {
 	}))
 	defer ts.Close()
 
+	requestInfo := ydns.RequestInfo{
+		Base:     ts.URL,
+		Host:     "test-1.com",
+		IP:       "127.0.0.1",
+		RecordID: "123456",
+		User:     "user",
+		Pass:     "pass",
+	}
+
 	// Ensure there's no error running it with the right options.
-	if err := ydns.Run(ts.URL, "test-1.com", "x.x.x.x", "record_id", "user", "pass", "ipv4"); err != nil {
+	if err := ydns.Run(&requestInfo); err != nil {
 		t.Fatalf("expected no errors, got: %v", err)
 	}
 
@@ -40,11 +54,11 @@ func TestRun(t *testing.T) {
 		t.Fatalf("expected host to equal test-1.com, got: %s", host)
 	}
 
-	if ip != "x.x.x.x" {
+	if ip != "127.0.0.1" {
 		t.Fatalf("expected ip to equal x.x.x.x, got: %s", ip)
 	}
 
-	if record_id != "record_id" {
-		t.Fatalf("expected record_id to equal record_id, got: %s", record_id)
+	if recordID != "123456" {
+		t.Fatalf("expected record_id to equal record_id, got: %s", recordID)
 	}
 }

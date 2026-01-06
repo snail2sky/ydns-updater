@@ -2,6 +2,7 @@ package ydns
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -11,28 +12,34 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type RequestInfo struct {
+	Family   string
+	Base     string
+	RecordID string
+	Host     string
+	User     string
+	Pass     string
+	IP       string
+}
+
 // Run will run the update operation.
 // Run will execute the update operation. The `family` parameter can be
 // "ipv4", "ipv6" or any other value (means no preference).
-func Run(base, host, ip, record_id, user, pass, family string) error {
-	u, err := url.Parse(base)
+func Run(requestInfo *RequestInfo) error {
+	u, err := url.Parse(requestInfo.Base)
 	if err != nil {
 		return errors.Wrap(err, "cannot create url")
 	}
 
 	values := url.Values{}
-	values.Set("host", host)
+	values.Set("host", requestInfo.Host)
 
-	logrus.WithField("ip family", family).Info("updating record")
-
-	if ip != "" {
-		logrus.WithField("ip", ip).Info("updating record")
-		values.Set("ip", ip)
+	if requestInfo.IP != "" {
+		values.Set("ip", requestInfo.IP)
 	}
 
-	if record_id != "" {
-		logrus.WithField("record_id", record_id).Info("updating record")
-		values.Set("record_id", record_id)
+	if requestInfo.RecordID != "" {
+		values.Set("record_id", requestInfo.RecordID)
 	}
 
 	u.RawQuery = values.Encode()
@@ -42,15 +49,21 @@ func Run(base, host, ip, record_id, user, pass, family string) error {
 		return errors.Wrap(err, "cannot create request")
 	}
 
-	req.SetBasicAuth(user, pass)
+	req.SetBasicAuth(requestInfo.User, requestInfo.Pass)
 
-	logrus.WithField("host", host).Info("updating record")
+	// ignore user and pass
+	requestInfo.User = "***"
+	requestInfo.Pass = "***"
+	logrus.WithField("requestInfo", fmt.Sprintf("%#v", *requestInfo)).Info("updating record")
 
 	// Build an HTTP client that can be forced to use IPv4 or IPv6 when needed.
-	transport, _ := http.DefaultTransport.(*http.Transport)
+	transport, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return errors.New("cannot get default transport")
+	}
 	tr := transport.Clone()
 
-	switch family {
+	switch requestInfo.Family {
 	case "ipv4", "4":
 		tr.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 			d := &net.Dialer{}
@@ -83,7 +96,7 @@ func Run(base, host, ip, record_id, user, pass, family string) error {
 	// Log based on request status code
 	switch res.StatusCode {
 	case http.StatusOK:
-		logrus.WithField("host", host).Info("update was successful")
+		logrus.WithField("host", requestInfo.Host).Info("update was successful")
 	case http.StatusBadRequest:
 		return errors.New("failed to perform request due to invalid input parameters")
 	case http.StatusUnauthorized:
