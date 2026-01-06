@@ -17,8 +17,6 @@ func TestRun(t *testing.T) {
 		host     string
 		ip       string
 		recordID string
-		//user     string
-		//pass     string
 	)
 
 	// Setup the testing server to get the request.
