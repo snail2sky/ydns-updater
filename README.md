@@ -23,7 +23,8 @@ cp $GOPATH/src/github.com/wyattjoh/ydns-updater/systemd/ydns-updater.service /et
 # --user "<API USERNAME>" Found https://ydns.io/api/v1/
 # --pass "<API PASS>" Found https://ydns.io/api/v1/
 # --ip "<IP>" Optional. Found https://ydns.io/api/v1/
-# --record_id "<RECORD_ID>" Optional. Found https://ydns.io/api/v1/
+# --recordID "<RECORD_ID>" Optional. Found https://ydns.io/api/v1/
+# --family "FAMILY" Optional. ipv4 or ipv6
 vim /etc/systemd/system/ydns-updater.service
 
 # Start and enable service
